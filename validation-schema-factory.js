@@ -22,19 +22,27 @@ const groupAddressSchema = z.preprocess(
     .lt(16)
 );
 
-function buildValidationSchema(group) {
+const levelSchema = z.preprocess(
+  (val) => parseInt(val, 10),
+  z
+    .number({
+      required_error: "Level is required",
+      invalid_type_error: "Level must be a number",
+    })
+    .gte(0)
+    .lte(254)
+);
+
+function buildValidationSchema(group, broadcast) {
+  if (broadcast) {
+    return z.object({
+      level: levelSchema,
+    });
+  }
+
   return z.object({
     address: group ? groupAddressSchema : shortAddressSchema,
-    level: z.preprocess(
-      (val) => parseInt(val, 10),
-      z
-        .number({
-          required_error: "Level is required",
-          invalid_type_error: "Level must be a number",
-        })
-        .gte(0)
-        .lte(254)
-    ),
+    level: levelSchema,
   });
 }
 
